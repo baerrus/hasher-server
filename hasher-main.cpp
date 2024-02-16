@@ -8,6 +8,7 @@
 #include <asio/ts/buffer.hpp>
 #include <asio/ts/internet.hpp>
 #include <asio/thread_pool.hpp>
+#include <asio/strand.hpp>
 
 
 #include "buffer.h"
@@ -34,6 +35,7 @@ public:
                       << " threadId: " << std::this_thread::get_id() << std::endl;
             do_read();
             io_context_.run();
+
             std::cout << "Client thread ended: " << std::this_thread::get_id() << std::endl;
         } catch (std::exception& e) {
             std::cerr << "** client exception: " << e.what() << "\n";
@@ -44,23 +46,25 @@ private:
     void do_read()
     {
         auto buffer = make_buffer(max_read_size);
-        socket_.async_read_some( asio::buffer(buffer->data(), max_read_size),
-            [this, buffer, self = shared_from_this()](std::error_code ec, std::size_t length) {
-                if (!ec) {
-                    buffer->resize(length);
-                    hasher_.work(buffer, [this, self](Buffer buffer){
-                        self->do_write(buffer);
-                    });
-               } else if(ec == asio::error::misc_errors::eof) {
+        if(socket_.is_open())
+            socket_.async_read_some( asio::buffer(buffer->data(), max_read_size),
+                [this, buffer, self = shared_from_this()](std::error_code ec, std::size_t length) {
+                    if (!ec) {
+                        buffer->resize(length);
+                        hasher_.work(buffer, [this, self](Buffer buffer){
+                            self->do_write(buffer);
+                        });
+                        self->do_read();
+                   } else if(ec == asio::error::misc_errors::eof) {
 
-                    std::cout << "Client disconnected: " << socket_.remote_endpoint() << std::endl;
-                    //self->do_close();
-                }
-                else {
-                    std::cerr << "read error: " << ec << std::endl;
-                    self->do_close();
-                }
-            });
+                        std::cout << "Client disconnected: " << socket_.remote_endpoint() << std::endl;
+                        socket_.shutdown(asio::ip::tcp::socket::shutdown_receive);
+                    }
+                    else {
+                        std::cerr << "read error: " << ec << std::endl;
+                        self->do_close();
+                    }
+                });
     }
 
     void do_write(Buffer buffer)
@@ -68,10 +72,7 @@ private:
         auto self(shared_from_this());
         asio::async_write(socket_, asio::buffer(buffer->data(), buffer->size()),
             [self, buffer](std::error_code ec, std::size_t /*length*/) {
-                if (!ec) {
-                    self->do_read();
-                }
-                else {
+                if (ec) {
                     std::cerr << "write error: " << ec << std::endl;
                     self->do_close();
                 }
@@ -84,7 +85,8 @@ private:
 
     asio::io_context io_context_;
     tcp::socket          socket_;
-    HasherStream         hasher_;  // compute hash
+    HasherStream         hasher_;  // hash compute engine
+    //asio::strand         strand_;  // serialize all compute within a single client
 
     enum { max_read_size = 1024 };
 };
