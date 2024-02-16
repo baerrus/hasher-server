@@ -7,7 +7,7 @@
 #include <openssl/md5.h>
 
 	HasherStream::HasherStream() {
-		reset();
+		reset_context();
 	}
 
 	void HasherStream::work(Buffer buffer, WriteCallback wrcb) {
@@ -23,31 +23,31 @@
 			wrcb(res_buffer);
 		};
 
-		parse(buffer, hash_finalize);
+		parse_block(buffer, hash_finalize);
 	}
 
 
-	void HasherStream::reset() {
+	void HasherStream::reset_context() {
 		MD5_Init(&ctx);
 	}
 
-	void HasherStream::parse(Buffer buffer, std::function<void (char * start, char * end)> finalize){
+	void HasherStream::parse_block(Buffer buffer, std::function<void (char * start, char * end)> finalize){
 		char * pb = buffer->data(), 
 		     * chunk = buffer->data();
 
 		for(; pb < buffer->data()+buffer->size(); pb++) {
 			if(*pb == delim) {
 				finalize(chunk, pb); // exclude the delim
-				reset();
+				reset_context();
 				chunk = pb + 1; // skip the delimiter
 			}
 		}
 		if(pb > chunk)
-			process(chunk, pb);
+			process_block(chunk, pb);
 	}
 
 
-	void HasherStream::process(char * start, char * end) {
+	void HasherStream::process_block(char * start, char * end) {
 
 		if(MD5_Update(&ctx, start, end - start) == 0)
 			throw std::runtime_error("MD5 error");

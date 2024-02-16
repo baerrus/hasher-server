@@ -8,6 +8,8 @@
 
 /*
  * Data is delimited by a single character '\n'
+ *
+ * TODO: parametrize the class to support any hashing function
  */
 
 
@@ -25,9 +27,9 @@ public:
 
 private:
 
-	void reset();
-	void parse(Buffer buffer, std::function<void (char * start, char * end)> finalize);
-	void process(char * start, char * end);
+	void reset_context();
+	void parse_block(Buffer buffer, std::function<void (char * start, char * end)> finalize);
+	void process_block(char * start, char * end);
 	Buffer format(unsigned char digest[]);
 	
     uint8_t* hexencode(uint8_t* first, uint8_t* last, uint8_t* out);

@@ -3,7 +3,7 @@ ASIO_VERSION := 1.28.0
 
 ASIO_PACKAGE = $(ASIO_PREFIX)-$(ASIO_VERSION).tar.bz2
 
-TARGET := hasher-tcpserver
+TARGET := hasher-server
 
 CXXFLAGS = -g -std=c++17
 
