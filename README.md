@@ -15,7 +15,7 @@ sequientially to preserve correctness and order of the result stream. As a bonus
  ## Alternative Design
 
  A solid alternative would be to use a dedicated compute thread per each client connection. A drawback of this 
- approach is that dormant clients (clients sendig little to no data) would consume as much valuable server resource
+ approach is that dormant clients (clients sending little to no data) would consume as much valuable server resource
  as clients that send a lot of data. An advantage is maintaining a stable sequential order of inputs vs output. The
  drawbacks vs advantages of the main approach that was implemented are the exact reverse.
 
@@ -45,6 +45,19 @@ To launch with non-default config:
 To run unit tests. The server is expected to be found on localhost:8000
 
 `>cd test; python -m unittest oneshot_tests.py`
+
+# Testing
+
+To run a load test of ~ 128K lines through a server
+
+`> netcat localhost 8000 < test/big.txt > test/result`
+
+Stop netcat and verify the number of lines in result file is the same as in big.txt file:
+
+`> wc -l test/big.txt 
+128457 test/big.txt
+> wc -l test/result
+128457 test/result`
 
 # TODO
 1. Handle any streamable hash function supported by openssl, not just MD5
