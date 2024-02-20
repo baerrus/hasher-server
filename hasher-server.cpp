@@ -73,13 +73,13 @@ void ClientSession::do_close()
     socket_.close();
 }
 
-TcpServer::TcpServer(short port)
-    : acceptor_(io_context_, tcp::endpoint(tcp::v4(), port))
+TcpServer::TcpServer(Configuration & config)
+    : acceptor_(io_context_, tcp::endpoint(tcp::v4(), config.port.value_or(8000)))
     , socket_(io_context_)
-    , io_pool_(16)
-    , compute_pool_(10)
+    , io_pool_(config.conn_pool_capacity.value_or(16))
+    , compute_pool_(config.compute_pool_capacity.value_or(16))
 {
-    std::cout << "Starting server on " << tcp::endpoint(tcp::v4(), port)
+    std::cout << "Starting server on " << acceptor_.local_endpoint()
               << std::endl;
 }
 

@@ -12,7 +12,7 @@
 
 #include "buffer.h"
 #include "hasher-stream.h"
-
+#include "hasher-config.h"
 
 using asio::ip::tcp;
 
@@ -40,7 +40,7 @@ private:
 
 class TcpServer {
 public:
-    TcpServer(short port);
+    TcpServer(Configuration & config);
 
     ~TcpServer();
 

@@ -12,7 +12,8 @@ CPPFLAGS = -I$(ASIO_PREFIX)-$(ASIO_VERSION)/include
 SOURCES = hasher-main.cpp \
           hasher-server.cpp \
           hasher-stream.cpp \
-          buffer.cpp
+          buffer.cpp \
+          hasher-config.cpp
 
 OBJS := $(SOURCES:.cpp=.o)
 
