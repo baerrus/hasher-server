@@ -54,9 +54,9 @@ To run a load test of ~ 128K lines through a server
 
 Stop netcat and verify the number of lines in result file is the same as in big.txt file:
 
-`> wc -l test/big.txt 
+`> wc -l test/big.txt` 
 128457 test/big.txt
-> wc -l test/result
+`> wc -l test/result`
 128457 test/result`
 
 # TODO
