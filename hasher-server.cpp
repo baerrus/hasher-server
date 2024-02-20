@@ -6,7 +6,7 @@
 #include "hasher-server.h"
 
 
-ClientSession::ClientSession(tcp::socket socket, asio::thread_pool& compute)
+ClientConnection::ClientConnection(tcp::socket socket, asio::thread_pool& compute)
     : socket_(io_context_)
     , strand_(compute.executor())
     , compute_(compute)
@@ -16,7 +16,7 @@ ClientSession::ClientSession(tcp::socket socket, asio::thread_pool& compute)
     socket_.assign(tcp::v4(), socket.release());
 }
 
-void ClientSession::start()
+void ClientConnection::start()
 {
     try {
         std::cout << "New client: " << socket_.remote_endpoint()
@@ -30,7 +30,7 @@ void ClientSession::start()
     }
 }
 
-void ClientSession::do_read()
+void ClientConnection::do_read()
 {
     auto buffer = make_buffer(max_read_size);
     if (socket_.is_open())
@@ -55,7 +55,7 @@ void ClientSession::do_read()
             });
 }
 
-void ClientSession::do_write(Buffer buffer)
+void ClientConnection::do_write(Buffer buffer)
 {
     auto self(shared_from_this());
     if (socket_.is_open())
@@ -68,7 +68,7 @@ void ClientSession::do_write(Buffer buffer)
             });
 }
 
-void ClientSession::do_close()
+void ClientConnection::do_close()
 {
     socket_.close();
 }
@@ -101,7 +101,7 @@ void TcpServer::do_accept()
     acceptor_.async_accept(socket_, [this](std::error_code ec) {
         if (!ec) {
             asio::post(io_pool_, [this]() {
-                std::make_shared<ClientSession>(std::move(socket_), compute_pool_)->start();
+                std::make_shared<ClientConnection>(std::move(socket_), compute_pool_)->start();
             });
         }
         do_accept();

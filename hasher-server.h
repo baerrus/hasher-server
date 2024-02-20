@@ -16,9 +16,9 @@
 
 using asio::ip::tcp;
 
-class ClientSession : public std::enable_shared_from_this<ClientSession> {
+class ClientConnection : public std::enable_shared_from_this<ClientConnection> {
 public:
-    ClientSession(tcp::socket socket, asio::thread_pool& compute);
+    ClientConnection(tcp::socket socket, asio::thread_pool& compute);
 
     void start();
 
