@@ -1,6 +1,6 @@
 # hasher-server
 
-## A  highly scalable MD5 hash caclulating server in C++. Demonstates a vertically scalable network server design.
+### A highly scalable MD5 hash caclulating server in C++. Demonstates a vertically scalable network server design.  Accepts line delimited string inputs and returns hex-encoded MD5 hash of each string.
 
 # The Architecture
 
@@ -24,7 +24,7 @@ sequientially to preserve correctness and order of the result stream. As a bonus
 1. Depends on asio library for asyncronous primitive and base networking. Source included.
 2. Depends on openssl libcrypto. It is expected to be installed in an default accessible path.
 
-# Build
+# Build / Run
 
 Run once to prepare dependencies
 
@@ -34,6 +34,15 @@ To build on ubuntu 20 run:
 
 `> make`
 
+To launch the server. By default the server will listen on port 8000 of every IPv4 interface on the host.
+
+`>./hasher-server`
+
+To launch with non-default config:
+
+`> HASHER_SERVER_COMPUTE_CAP=1 HASHER_SERVER_PORT=6000 ./hasher-server`
+
 # TODO
 1. Handle any streamable hash function supported by openssl, not just MD5
 2. Support IPv6
+3. Better logging
