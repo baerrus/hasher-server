@@ -42,6 +42,10 @@ To launch with non-default config:
 
 `> HASHER_SERVER_COMPUTE_CAP=1 HASHER_SERVER_PORT=6000 ./hasher-server`
 
+To run unit tests. The server is expected to be found on localhost:8000
+
+`>cd test; python -m unittest oneshot_tests.py`
+
 # TODO
 1. Handle any streamable hash function supported by openssl, not just MD5
 2. Support IPv6
