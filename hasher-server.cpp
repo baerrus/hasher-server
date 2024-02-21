@@ -9,6 +9,7 @@
 ClientConnection::ClientConnection(tcp::socket socket, asio::thread_pool& compute)
     : socket_(io_context_)
     , strand_(compute.executor())
+    //,strand_(io_context.get_executor())
     , compute_(compute)
 {
     // must transfer socket ownership since client connection
@@ -38,14 +39,13 @@ void ClientConnection::do_read()
             [this, buffer, self = shared_from_this()](std::error_code ec, std::size_t length) {
                 if (!ec) {
                     buffer->resize(length);
-                    // asio::post(compute_, asio::bind_executor(strand_, [this, self, buffer](){
+                    asio::post(compute_, asio::bind_executor(strand_, [this, self, buffer](){
                     hasher_.work(buffer, [self](Buffer buffer) {
                         self->do_write(buffer);
-                    }); // end of work callback
-                    //})); // end of post handler
+                    	}); // end of work callback
+                    })); // end of post handler
                     self->do_read();
                 } else if (ec == asio::error::misc_errors::eof) {
-
                     std::cout << "Client disconnected: " << socket_.remote_endpoint() << std::endl;
                     socket_.shutdown(asio::ip::tcp::socket::shutdown_receive);
                 } else {
