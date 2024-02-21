@@ -4,9 +4,6 @@ import sys, socket, time
 
 class OneShotTestCase(unittest.TestCase):
 
- #   def __init__(self, host="localhost", port=8000):
- #       super(OneShotTestCase, self).__init__()
-
     def setUp(self):
         self.host = "localhost"
         self.port = 8000
