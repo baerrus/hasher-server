@@ -36,7 +36,7 @@ private:
     asio::thread_pool& compute_; // @hasher_ executes on this pool
     BufferQueue bq_;  // pending buffers
 
-    enum { max_read_size = 102 };
+    enum { max_read_size = 1024 };
 };
 
 class TcpServer {

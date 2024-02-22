@@ -1,6 +1,8 @@
 //
 // Copyright (c) 2024 Vlad Troyanker
 //
+#ifndef HASHER_STREAM_H
+#define HASHER_STREAM_H
 
 #include "buffer.h"
 
@@ -33,3 +35,5 @@ private:
 
     MD5_CTX ctx;
 };
+
+#endif

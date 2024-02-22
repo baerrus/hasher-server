@@ -2,6 +2,7 @@
 // Copyright (c) 2024 Vlad Troyanker
 //
 #ifndef HASHER_BUFFER_H
+#define HASHER_BUFFER_H
 
 #include <memory>
 #include <vector>
@@ -39,5 +40,4 @@ public:
 	Buffer dequeue();
 };
 
-#define HASHER_BUFFER_H
 #endif
