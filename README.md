@@ -8,8 +8,7 @@ The architecture is built around three elements: main thread that listens and ac
 Handling client connections is farmed out to thread pool #1. So it can service up to N connections simultaneously.
 Executing hash computations is performed on a another thread pool (pool #2). All clients collectively send their 
 computational load to pool #2. Note that each client's computations are executed on different threads but 
-sequientially to preserve correctness and order of the result stream. As a bonus **there are no mutexes**
- or any other synchronisation primitives used (on top of asio elements). Both capacity pools are configurable
+sequientially to preserve correctness and order of the result stream. Both capacity pools are configurable
  via environment variables.
 
  ## Alternative Design

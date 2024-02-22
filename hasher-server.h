@@ -33,10 +33,10 @@ private:
     tcp::socket socket_;
     HasherStream hasher_; // hash compute engine
     asio::strand<asio::thread_pool::executor_type> strand_; // serialize all compute within a single client
-    //asio::strand<asio::io_context::executor_type> strand_;
     asio::thread_pool& compute_; // @hasher_ executes on this pool
+    BufferQueue bq_;  // pending buffers
 
-    enum { max_read_size = 1024 };
+    enum { max_read_size = 102 };
 };
 
 class TcpServer {

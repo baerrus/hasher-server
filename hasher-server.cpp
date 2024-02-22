@@ -39,11 +39,13 @@ void ClientConnection::do_read()
             [this, buffer, self = shared_from_this()](std::error_code ec, std::size_t length) {
                 if (!ec) {
                     buffer->resize(length);
-                    asio::post(compute_, asio::bind_executor(strand_, [this, self, buffer](){
-                    hasher_.work(buffer, [self](Buffer buffer) {
-                        self->do_write(buffer);
-                    	}); // end of work callback
+                    bq_.enqueue(buffer);
+                    asio::post(compute_, asio::bind_executor(strand_, [this, self](){
+	                     hasher_.work(bq_, [self](Buffer buffer) {
+	                               self->do_write(buffer);
+	                    			});
                     })); // end of post handler
+
                     self->do_read();
                 } else if (ec == asio::error::misc_errors::eof) {
                     std::cout << "Client disconnected: " << socket_.remote_endpoint() << std::endl;
