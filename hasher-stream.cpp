@@ -12,7 +12,7 @@ HasherStream::HasherStream()
     reset_context();
 }
 
-bool HasherStream::work(BufferQueue& bq, WriteCallback wrcb)
+void HasherStream::work(BufferQueue& bq, WriteCallback wrcb)
 {
 
     auto hash_finalize = [this, wrcb](char* start, char* end) {
@@ -27,7 +27,6 @@ bool HasherStream::work(BufferQueue& bq, WriteCallback wrcb)
 
     auto buffer = bq.dequeue();
     parse_block(buffer, hash_finalize);
-    return true;
 }
 
 void HasherStream::reset_context()

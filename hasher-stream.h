@@ -21,7 +21,7 @@ class HasherStream {
 public:
     HasherStream();
 
-    bool work(BufferQueue& bq, WriteCallback wrcb);
+    void work(BufferQueue& bq, WriteCallback wrcb);
 
 private:
     void reset_context();
