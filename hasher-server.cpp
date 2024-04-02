@@ -94,6 +94,7 @@ TcpServer::~TcpServer()
 
 void TcpServer::serve()
 {
+	acceptor_.listen();
     do_accept();
     io_context_.run();
 }

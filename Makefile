@@ -5,7 +5,7 @@ ASIO_PACKAGE = $(ASIO_PREFIX)-$(ASIO_VERSION).tar.bz2
 
 TARGET := hasher-server
 
-CXXFLAGS = -g -std=c++17
+CXXFLAGS = -g -std=c++2a
 
 CPPFLAGS = -I$(ASIO_PREFIX)-$(ASIO_VERSION)/include
 
