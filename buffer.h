@@ -26,8 +26,11 @@ Buffer make_buffer(unsigned size);
 
 using WriteCallback  = std::function<void (Buffer buffer)>;
 
-using ComputeHnadler = std::function<void (Buffer buffer, WriteCallback wrcb)>;
+using ComputeHandler = std::function<void (Buffer buffer, WriteCallback wrcb)>;
 
+/*
+ A minimal thread-safe buffer queue
+*/
 class BufferQueue {
 	
 	std::mutex             mutex_;

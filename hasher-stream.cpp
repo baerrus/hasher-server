@@ -46,7 +46,7 @@ void HasherStream::parse_block(Buffer buffer, std::function<void(char* start, ch
             chunk = pb + 1; // skip the delimiter
         }
     }
-    if (pb > chunk)
+    if (pb > chunk) // tail of the buffer is not delimited
         process_block(chunk, pb);
 }
 

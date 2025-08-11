@@ -9,8 +9,10 @@
 #include <openssl/md5.h>
 
 /*
- * Data is delimited by a single character '\n'
+ * Input data is character based stream of lines where lines delimited by a single character '\n'
  *
+ * Output is a MD5 hash of each input line.
+ * 
  * TODO: parametrize the class to support any hashing function
  */
 
