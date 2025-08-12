@@ -17,6 +17,12 @@ ClientConnection::ClientConnection(tcp::socket socket, asio::thread_pool& comput
     socket_.assign(tcp::v4(), socket.release());
 }
 
+ClientConnection::~ClientConnection(){
+        // TODO: Ensure do_close is called on the correct io_context thread
+        do_close(); 
+        std::cout << "ClientConnection dtor: "<< std::endl;
+}
+
 void ClientConnection::start()
 {
     try {
@@ -24,10 +30,9 @@ void ClientConnection::start()
                   << " threadId: " << std::this_thread::get_id() << std::endl;
         do_read();
         io_context_.run();
-
         std::cout << "Client thread ended: " << std::this_thread::get_id() << std::endl;
     } catch (std::exception& e) {
-        std::cerr << "** client exception: " << e.what() << "\n";
+        std::cerr << "** client exception: " << e.what() << std::endl;
     }
 }
 
@@ -49,7 +54,6 @@ void ClientConnection::do_read()
                     self->do_read();
                 } else if (ec == asio::error::misc_errors::eof) {
                     std::cout << "Client disconnected: " << socket_.remote_endpoint() << std::endl;
-                    socket_.shutdown(asio::ip::tcp::socket::shutdown_receive);
                 } else {
                     std::cerr << "read error: " << ec << std::endl;
                     self->do_close();
@@ -59,15 +63,23 @@ void ClientConnection::do_read()
 
 void ClientConnection::do_write(Buffer buffer)
 {
-    auto self(shared_from_this());
     if (socket_.is_open())
+    {
+        auto self(shared_from_this());
         asio::async_write(socket_, asio::buffer(buffer->data(), buffer->size()),
-            [self, buffer](std::error_code ec, std::size_t /*length*/) {
-                if (ec) {
-                    std::cerr << "write error: " << ec << std::endl;
-                    self->do_close();
-                }
-            });
+                          [self, buffer](std::error_code ec, std::size_t /*length*/)
+                          {
+                              if (ec)
+                              {
+                                  std::cerr << "write error: " << ec << std::endl;
+                                  self->do_close();
+                              }
+                          });
+    }
+    else
+    {
+        std::cout << "discard write buffer, socket closed" << std::endl;
+    }
 }
 
 void ClientConnection::do_close()
@@ -103,8 +115,9 @@ void TcpServer::do_accept()
 {
     acceptor_.async_accept(socket_, [this](std::error_code ec) {
         if (!ec) {
-            asio::post(io_pool_, [this]() {
-                std::make_shared<ClientConnection>(std::move(socket_), compute_pool_)->start();
+            auto conn = std::make_shared<ClientConnection>(std::move(socket_), compute_pool_);
+            asio::post(io_pool_, [conn]() {
+                conn->start();
             });
         }
         do_accept();
