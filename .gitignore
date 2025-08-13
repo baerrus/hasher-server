@@ -16,9 +16,11 @@
 *.dylib
 *.dll
 
-# Fortran module files
-*.mod
-*.smod
+# Misc VSCode files
+.vscode/
+asio-1.28.0/
+test/result*
+
 
 # Compiled Static libraries
 *.lai
