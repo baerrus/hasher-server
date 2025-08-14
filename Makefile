@@ -13,15 +13,15 @@ else ifeq ($(OS),Linux)
     LIBS = -lcrypto -lrt
 endif
 
-ASIO_PREFIX  := asio
-ASIO_VERSION := 1.28.0
+ASIO_PREFIX  := asio-asio
+ASIO_VERSION := 1-34-2
 
-ASIO_PACKAGE = $(ASIO_PREFIX)-$(ASIO_VERSION).tar.bz2
+ASIO_PACKAGE = $(ASIO_PREFIX)-$(ASIO_VERSION).zip
 
 
 CXXFLAGS = -g -std=c++2a
 
-CPPFLAGS += -I$(ASIO_PREFIX)-$(ASIO_VERSION)/include -DASIO_ENABLE_HANDLER_TRACKING
+CPPFLAGS += -I$(ASIO_PREFIX)-$(ASIO_VERSION)/asio/include -DASIO_ENABLE_HANDLER_TRACKING
 
 LDFLAGS = -pthread -L$(OPENSSL_LIB)
 
@@ -46,6 +46,8 @@ deps: $(ASIO_PREFIX)-$(ASIO_VERSION)
 
 $(ASIO_PREFIX)-$(ASIO_VERSION):
 	tar -xvf 3rdparty/$(ASIO_PACKAGE)
+
+asio: $(ASIO_PREFIX)-$(ASIO_VERSION)
 
 $(TARGET): $(OBJS)
 	$(CXX) $(OBJS) $(LDFLAGS) -o $@ $(LIBS)
