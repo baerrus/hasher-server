@@ -38,7 +38,7 @@ void TcpServer::do_accept()
         if (!ec) {
             auto conn = std::make_shared<ClientConnection>(std::move(socket_), compute_pool_);
             asio::post(io_pool_, [conn]() {
-                conn->start();
+                conn->run();
             });
         }
         do_accept();

@@ -6,6 +6,7 @@
 #include "hasher-server.h"
 #include "hasher-config.h"
 
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
