@@ -37,3 +37,15 @@ Buffer BufferQueue::dequeue()
     queue_.pop_front();
     return v;
 }
+
+BufferQueue::size_type BufferQueue::size() const
+{
+    std::lock_guard lg(mutex_);
+    return queue_.size();
+}
+
+bool BufferQueue::empty() const
+{
+    std::lock_guard lg(mutex_);
+    return queue_.empty();
+}

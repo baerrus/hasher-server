@@ -31,16 +31,19 @@ using ComputeHandler = std::function<void (Buffer buffer, WriteCallback wrcb)>;
 /*
  A minimal thread-safe buffer queue
 */
-class BufferQueue {
-	
-	std::mutex             mutex_;
-	std::condition_variable cond_;  // has data condition
-	std::deque<Buffer>     queue_;
+class BufferQueue
+{
+	using size_type = unsigned int;
+
+	mutable std::mutex mutex_;
+	std::condition_variable cond_; // has data condition
+	std::deque<Buffer> queue_;
 
 public:
-
-	void   enqueue(Buffer buf);
+	void enqueue(Buffer buf);
 	Buffer dequeue();
+	size_type size() const;
+	bool empty() const;
 };
 
 #endif
