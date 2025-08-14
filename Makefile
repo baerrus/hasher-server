@@ -1,7 +1,7 @@
 OS := $(shell uname)
 
 ifeq ($(OS),Darwin)
-    CFLAGS += -DMACOS
+    CFLAGS += -DMACOS 
     CPPFLAGS += -I$(shell brew --prefix)/include
     OPENSSL_PREFIX = /opt/homebrew/Cellar/openssl@3/3.5.0
     OPENSSL_LIB = $(OPENSSL_PREFIX)/lib
@@ -21,7 +21,7 @@ ASIO_PACKAGE = $(ASIO_PREFIX)-$(ASIO_VERSION).tar.bz2
 
 CXXFLAGS = -g -std=c++2a
 
-CPPFLAGS += -I$(ASIO_PREFIX)-$(ASIO_VERSION)/include
+CPPFLAGS += -I$(ASIO_PREFIX)-$(ASIO_VERSION)/include -DASIO_ENABLE_HANDLER_TRACKING
 
 LDFLAGS = -pthread -L$(OPENSSL_LIB)
 
@@ -31,7 +31,8 @@ SOURCES = hasher-main.cpp \
           hasher-server.cpp \
           hasher-stream.cpp \
           buffer.cpp \
-          hasher-config.cpp
+          hasher-config.cpp \
+          client-connection.cpp
 
 OBJS := $(SOURCES:.cpp=.o)
 
