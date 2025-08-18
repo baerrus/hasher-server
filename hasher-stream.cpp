@@ -12,7 +12,7 @@ HasherStream::HasherStream()
     reset_context();
 }
 
-void HasherStream::work(BufferQueue& bq, WriteCallback wrcb)
+void HasherStream::proc_bytes(BufferQueue& bq, WriteCallback wrcb)
 {
 
     auto hash_finalize = [this, wrcb](char* start, char* end) {

@@ -49,7 +49,7 @@ void ClientConnection::do_read()
                     buffer->resize(length);
                     bq_.enqueue(buffer);
                     asio::post(compute_, asio::bind_executor(strand_, [this, self](){
-	                     hasher_.work(bq_, [self](Buffer buffer) {
+	                     hasher_.proc_bytes(bq_, [self](Buffer buffer) {
 	                               self->do_write(buffer);
 	                    			});
                     })); // end of post handler

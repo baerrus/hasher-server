@@ -11,7 +11,7 @@
 /*
  * Input data is character based stream of lines where lines delimited by a single character '\n'
  *
- * Output is a MD5 hash of each input line.
+ * Output is a MD5 hash of each input line (not including th delimiter char).
  * 
  * TODO: parametrize the class to support any hashing function
  */
@@ -25,7 +25,7 @@ class HasherStream {
 public:
     HasherStream();
 
-    void work(BufferQueue& bq, WriteCallback wrcb);
+    void proc_bytes(BufferQueue& bq, WriteCallback wrcb);
 
 private:
     void reset_context();

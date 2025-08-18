@@ -16,9 +16,9 @@
 *.dylib
 *.dll
 
-# Misc VSCode files
+# Misc and VSCode files
 .vscode/
-asio-1.28.0/
+asio*/
 test/result*
 
 
