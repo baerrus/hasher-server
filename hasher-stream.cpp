@@ -14,35 +14,43 @@ HasherStream::HasherStream()
 
 void HasherStream::proc_bytes(BufferQueue& bq, WriteCallback wrcb)
 {
-
-    auto hash_finalize = [this, wrcb](char* start, char* end) {
-        unsigned char digest[MD5_DIGEST_LENGTH];
-
-        MD5_Update(&ctx, start, end - start);
-        if (MD5_Final(digest, &ctx) == 0)
-            throw std::runtime_error("MD5 error");
-        auto res_buffer = format(digest);
-        wrcb(res_buffer);
-    };
-
     auto buffer = bq.dequeue();
-    parse_block(buffer, hash_finalize);
+    parse_bytes(buffer, wrcb);
+}
+
+void HasherStream::finalize_bytes(WriteCallback wrcb)
+{
+    finalize(wrcb); // process any remaining bytes in the context
+    // and return the final hash result
 }
 
 void HasherStream::reset_context()
 {
-    MD5_Init(&ctx);
+    MD5_Init(&ctx); 
+    pending_data_ = false; // reset pending data flag
 }
 
-void HasherStream::parse_block(Buffer buffer, std::function<void(char* start, char* end)> finalize)
+void HasherStream::finalize(WriteCallback wrcb)
+{
+    unsigned char digest[MD5_DIGEST_LENGTH];
+    if (!pending_data_)
+        return; // nothing to finalize
+    if (MD5_Final(digest, &ctx) == 0)
+        throw std::runtime_error("MD5 error");
+    reset_context(); // reset context for next use
+    auto res_buffer = format(digest);
+    wrcb(res_buffer);
+}
+
+void HasherStream::parse_bytes(Buffer buffer, WriteCallback wrcb)
 {
     char *pb = buffer->data(),
          *chunk = buffer->data();
 
     for (; pb < buffer->data() + buffer->size(); pb++) {
         if (*pb == delim) {
-            finalize(chunk, pb); // exclude the delim
-            reset_context();
+            process_block(chunk, pb); // exclude the delim
+            finalize(wrcb);
             chunk = pb + 1; // skip the delimiter
         }
     }
@@ -52,9 +60,9 @@ void HasherStream::parse_block(Buffer buffer, std::function<void(char* start, ch
 
 void HasherStream::process_block(char* start, char* end)
 {
-
     if (MD5_Update(&ctx, start, end - start) == 0)
         throw std::runtime_error("MD5 error");
+    pending_data_ = true; 
 }
 
 Buffer HasherStream::format(unsigned char digest[])

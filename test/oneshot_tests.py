@@ -130,5 +130,21 @@ class OneShotTestCase(unittest.TestCase):
 
         self.assertEqual(reply, "81dc9bdb52d04dc20036dbd8313ed055\n")
 
+    def test_lastline_nocr(self):
+        content = "1234\n1234"
+        self.sock.sendall(content.encode())
+        time.sleep(0.5)
+        self.sock.shutdown(socket.SHUT_WR)
+
+        reply = ""
+
+        while True:
+            data = self.sock.recv(1024)
+            if not data:
+                break
+            reply += data.decode()
+
+        self.assertEqual(reply, "81dc9bdb52d04dc20036dbd8313ed055\n81dc9bdb52d04dc20036dbd8313ed055\n")
+
 if __name__ == '__main__':
    unittest.main()

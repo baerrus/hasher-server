@@ -26,16 +26,20 @@ public:
     HasherStream();
 
     void proc_bytes(BufferQueue& bq, WriteCallback wrcb);
+    void finalize_bytes(WriteCallback wrcb);
 
 private:
     void reset_context();
-    void parse_block(Buffer buffer, std::function<void(char* start, char* end)> finalize);
+    void finalize(WriteCallback wrcb);
+    void parse_bytes(Buffer buffer, WriteCallback wrcb);
     void process_block(char* start, char* end);
     Buffer format(unsigned char digest[]);
 
     uint8_t* hexencode(uint8_t* first, uint8_t* last, uint8_t* out);
 
     MD5_CTX ctx;
+    bool pending_data_ = false; // true if there is a pending data to process
+    // this is required to avoid finalizing an empty context
 };
 
 #endif

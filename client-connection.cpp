@@ -55,7 +55,14 @@ void ClientConnection::do_read()
                     })); // end of post handler
 
                     self->do_read();
-                } else if (ec == asio::error::misc_errors::eof) {
+                }
+                else if (ec == asio::error::misc_errors::eof)
+                {
+                    asio::post(compute_, asio::bind_executor(strand_, [this, self](){
+                    hasher_.finalize_bytes([self](Buffer buffer)
+                                           { self->do_write(buffer); });
+                }));
+
                     std::cout << "Client disconnected: " << socket_.remote_endpoint() << std::endl;
                     std::cout << "self->use_count: " << self.use_count() << std::endl;
                     std::cout << "pending buffer count: " << bq_.size() << std::endl;
@@ -64,7 +71,7 @@ void ClientConnection::do_read()
                     std::cerr << "read error: " << ec << std::endl;
                     self->do_close();
                 }
-            });
+                });
 }
 
 void ClientConnection::do_write(Buffer buffer)
