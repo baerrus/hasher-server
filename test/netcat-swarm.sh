@@ -9,25 +9,11 @@ else
     exit 1
 fi
 
-$NETCAT -w 1 localhost 8000 < big.txt > result1 &
-$NETCAT -w 1 localhost 8000 < big.txt > result2 &
-$NETCAT -w 1 localhost 8000 < big.txt > result3 &
-$NETCAT -w 1 localhost 8000 < big.txt > result4 &
-$NETCAT -w 1 localhost 8000 < big.txt > result5 &
-$NETCAT -w 1 localhost 8000 < big.txt > result6 &
-$NETCAT -w 1 localhost 8000 < big.txt > result7 &
-$NETCAT -w 1 localhost 8000 < big.txt > result8 &
-$NETCAT -w 1 localhost 8000 < big.txt > result9 &
-$NETCAT -w 1 localhost 8000 < big.txt > result10 &
-$NETCAT -w 1 localhost 8000 < big.txt > result11 &
-$NETCAT -w 2 localhost 8000 < big.txt > result12 &
-$NETCAT -w 2 localhost 8000 < big.txt > result13 &
-$NETCAT -w 2 localhost 8000 < big.txt > result14 &
-$NETCAT -w 2 localhost 8000 < big.txt > result15 &
-$NETCAT -w 2 localhost 8000 < big.txt > result15 &
-$NETCAT -w 2 localhost 8000 < big.txt > result17 &
-$NETCAT -w 2 localhost 8000 < big.txt > result18 &
-$NETCAT -w 2 localhost 8000 < big.txt > result19 &
-$NETCAT -w 2 localhost 8000 < big.txt > result20 &
-$NETCAT -w 2 localhost 8000 < big.txt > result21 &
-$NETCAT -w 2 localhost 8000 < big.txt > result22 &
+ADDRESS="localhost"
+PORT=8001
+for i in {1..50}; do
+    $NETCAT -w 1 $ADDRESS $PORT < big.txt > "result${i}" &
+done
+# Wait for all background processes to finish
+wait
+echo "** Finished\n"

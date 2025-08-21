@@ -34,7 +34,7 @@ private:
     asio::strand<asio::thread_pool::executor_type> strand_; // serialize all compute within a single client
     asio::thread_pool &compute_;                            // @hasher_ executes on this pool
     BufferQueue bq_;                                        // pending buffers
-    asio::steady_timer fin_timer;                     // timer to close the connection after all pending buffers are processed
+    asio::executor_work_guard<asio::io_context::executor_type> work_guard_; // release when all work completes
 
     enum
     {
