@@ -28,7 +28,9 @@ test/result*
 *.a
 *.lib
 
-# Executables
-*.exe
-*.out
-*.app
+# Bazel stuff
+bazel-out/
+bazel-bin/
+bazel-testlogs/
+bazel-hasher-server/
+.bazelversion

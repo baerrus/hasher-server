@@ -1,0 +1,60 @@
+# BUILD.bazel generated from Makefile
+
+# Load the rules_cc repository for C++ build rules
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+#load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+config_setting(
+    name = "darwin",
+    constraint_values = ["@platforms//os:osx"],
+)
+
+cc_binary(
+    name = "hasher_server",
+    srcs = [
+        "hasher-main.cpp",
+        "hasher-server.cpp",
+        "hasher-server.h",
+        "client-connection.cpp",
+        "client-connection.h",
+        "hasher-stream.cpp",
+        "hasher-stream.h",
+        "hasher-config.cpp",
+        "hasher-config.h",
+        "buffer.cpp",
+        "buffer.h",
+        "shared_tracker.h",
+    ],
+
+    deps = [
+        "@asio//:asio",
+    ],
+    includes = ["@asio//:asio/include"],
+    copts = [
+        "-g",
+        "-std=c++20",
+    ] + select({
+        ":darwin": [
+            "-DMACOS",
+#            "-I/opt/homebrew/include",
+        ],
+        "//conditions:default": [],
+    }),
+    defines = [
+        # Optionally add ASIO_ENABLE_HANDLER_TRACKING for debug
+        # "ASIO_ENABLE_HANDLER_TRACKING",
+    ],
+    linkopts = [
+        "-pthread",
+    ] + select({
+        ":darwin": [
+            "-lcrypto",
+            "-L/opt/homebrew/Cellar/openssl@3/3.5.0/lib",
+        ],
+        "//conditions:default": [
+            "-lcrypto",
+            "-lrt",
+        ],
+    }),
+)
