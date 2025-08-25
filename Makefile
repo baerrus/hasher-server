@@ -19,7 +19,7 @@ ASIO_VERSION := 1-34-2
 ASIO_PACKAGE = $(ASIO_PREFIX)-$(ASIO_VERSION).zip
 
 
-CXXFLAGS = -g -std=c++2a
+CXXFLAGS = -g -std=c++20
 
 CPPFLAGS += -I$(ASIO_PREFIX)-$(ASIO_VERSION)/asio/include
 
