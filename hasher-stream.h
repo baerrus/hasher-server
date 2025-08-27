@@ -25,7 +25,7 @@ class HasherStream {
 public:
     HasherStream();
 
-    void proc_bytes(BufferQueue& bq, WriteCallback wrcb);
+    void proc_bytes(Buffer buffer, WriteCallback wrcb);
     void finalize_bytes(WriteCallback wrcb);
 
 private:

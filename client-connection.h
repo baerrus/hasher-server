@@ -11,13 +11,12 @@
 #include <memory>
 using asio::ip::tcp;
 
-#include "buffer.h"
 #include "hasher-stream.h"
 
 
 class ClientConnection : public std::enable_shared_from_this<ClientConnection> {
 public:
-    ClientConnection(tcp::socket socket, asio::thread_pool& compute);
+    ClientConnection(tcp::socket socket);
    ~ClientConnection();
    
     void run();
@@ -30,11 +29,12 @@ private:
     
     asio::io_context io_context_;
     tcp::socket socket_;
-    HasherStream hasher_;                                   // hash compute engine
-    asio::strand<asio::thread_pool::executor_type> strand_; // serialize all compute within a single client
-    asio::thread_pool &compute_;                            // @hasher_ executes on this pool
-    BufferQueue bq_;                                        // pending buffers
-    asio::executor_work_guard<asio::io_context::executor_type> work_guard_; // release when all work completes
+    HasherStream hasher_;                    // hash compute engine
+    asio::thread_pool compute_{1};           // @hasher_ executes on this pool. It must be a single thread as that implicitly keep the order of the input data
+
+    asio::executor_work_guard<asio::io_context::executor_type> work_guard_; // keeps io_context running until this is released or reset
+    asio::steady_timer fin_timer_;                           // timer to delay closing the connection so all pending buffers are processed
+    std::atomic<int> pending_write_ops_{0};                    // count of pending write operations
 
     enum
     {

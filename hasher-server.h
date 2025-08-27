@@ -29,5 +29,4 @@ private:
     tcp::acceptor acceptor_;
     tcp::socket socket_;
     asio::thread_pool io_pool_; // client connections run here
-    asio::thread_pool compute_pool_; // hash computations run here
 };

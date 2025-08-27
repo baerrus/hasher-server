@@ -12,9 +12,8 @@ HasherStream::HasherStream()
     reset_context();
 }
 
-void HasherStream::proc_bytes(BufferQueue& bq, WriteCallback wrcb)
+void HasherStream::proc_bytes(Buffer buffer, WriteCallback wrcb)
 {
-    auto buffer = bq.dequeue();
     parse_bytes(buffer, wrcb);
 }
 

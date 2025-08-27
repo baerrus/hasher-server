@@ -8,11 +8,10 @@
 #include <thread>
 #include <format>
 
-ClientConnection::ClientConnection(tcp::socket socket, asio::thread_pool& compute)
+ClientConnection::ClientConnection(tcp::socket socket)
     : socket_(io_context_)
-    , strand_(compute.executor())
-    , compute_(compute)
     , work_guard_(io_context_.get_executor()) // keep io_context running until this is released or reset
+    , fin_timer_(io_context_)
 {
     // must transfer socket ownership since client connection
     // operates on a different io_context from the acceptor
@@ -35,7 +34,7 @@ void ClientConnection::run()
         io_context_.run();
         std::cout << "ClientConnection thread ending: " << std::this_thread::get_id() << std::endl;
     } catch (std::exception& e) {
-        std::cerr << "** client exception: " << e.what() << std::endl;
+        std::cerr << " ** client exception: " << e.what() << std::endl;
     }
 }
 
@@ -49,32 +48,31 @@ void ClientConnection::do_read()
                                     if (!ec)
                                     {
                                         buffer->resize(length);
-                                        bq_.enqueue(buffer);
-                                        asio::post(compute_, asio::bind_executor(strand_, [this, self]()
-                                                                                { hasher_.proc_bytes(bq_, [self](Buffer buffer)
-                                                                                                      { self->do_write(buffer); }); 
-                                                                                })); // end of post handler
+                                        asio::post(compute_, [buffer, self]()
+                                                   { self->hasher_.proc_bytes(buffer, [self](Buffer buffer)
+                                                                              { self->do_write(buffer); }); }); // end of post handler
 
-                                        self->do_read();
+                                        do_read();
                                     }
                                     else if (ec == asio::error::misc_errors::eof)
                                     {
-                                        asio::post(compute_, asio::bind_executor(strand_, [this, self]()
-                                                                                { hasher_.finalize_bytes([self](Buffer buffer)
-                                                                                                        { self->do_write(buffer); });
-                                        
-                                        asio::defer(io_context_, [self]() {      
-                                                    self->finish();     // now that compute job is finished
-                                                                        // we can close the connection
-                                                                        std::cout << "Finished sent: use_count = " << self.use_count() << std::endl;
-                                                });
-                                        })); // end of post handler
+                                        std::cout << this << " Client disconnected: " << socket_.remote_endpoint() << std::endl;
+                                        asio::post(compute_, [self]()
+                                                   {
+                                                       self->hasher_.finalize_bytes([self](Buffer buffer)
+                                                                                    { self->do_write(buffer); });
 
-                                        std::cout << "Client disconnected: " << socket_.remote_endpoint() << std::endl;
+                                                       asio::post(self->io_context_, [self]()
+                                                                  {
+                                                                      self->finish(); // now that compute job is finished
+                                                                                      // we can close the connection
+                                                                  });
+                                                       std::cout << self.get() << " Finish sent " << std::endl;
+                                                   }); // end of post handler
                                     }
                                     else
                                     {
-                                        std::cerr << "read error: " << ec << std::endl;
+                                        std::cerr << " ** read error: " << ec << std::endl;
                                         self->do_close();
                                     }
                                 });
@@ -88,16 +86,18 @@ void ClientConnection::do_write(Buffer buffer)
         asio::async_write(socket_, asio::buffer(buffer->data(), buffer->size()),
                           [self, buffer](std::error_code ec, std::size_t /*length*/)
                           {
+                            self->pending_write_ops_--;
                               if (ec)
                               {
                                   std::cerr << "write error: " << ec << std::endl;
                                   self->do_close();
                               }
                           });
+        pending_write_ops_++;
     }
     else
     {
-        std::cout << "discard write buffer, socket closed" << std::endl;
+        std::cout << this << " ** discard write buffer, socket closed" << std::endl;
     }
 }
 
@@ -114,8 +114,27 @@ void ClientConnection::do_close()
 */
 void ClientConnection::finish()
 {
-    work_guard_.reset(); // all work is done
-    std::cout << this << " ClientConnection finished" << std::endl;
-    if( !bq_.empty())
-        std::cout << this << "** pending buffer count: " << bq_.size() << std::endl;
+    int pending = pending_write_ops_.load();
+    if (pending <= 0)
+    {
+        work_guard_.reset(); // all work is done
+        // Note: we call join here because we are guaranteed to be on io_context thread
+        // unlike the destructor which may be called from any thread
+        compute_.join(); // wait for compute thread to complete all outstanding work
+
+        std::cout << this << " ClientConnection finished" << std::endl;
+    }
+    else
+    {
+        std::cout << this << " ** pending write count: " << pending << std::endl;
+        fin_timer_.expires_after(std::chrono::milliseconds(10));
+        fin_timer_.async_wait([self = shared_from_this()](const std::error_code &ec)
+                              {
+            if(!ec) {
+                self->finish(); // check again
+            } 
+            else {
+                std::cerr << " ** finish timer error: " << ec << std::endl;
+            } });
+    }
 }
