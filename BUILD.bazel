@@ -1,10 +1,5 @@
 # BUILD.bazel generated from Makefile
 
-# Load the rules_cc repository for C++ build rules
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-#load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-
 config_setting(
     name = "darwin",
     constraint_values = ["@platforms//os:osx"],
@@ -24,7 +19,6 @@ cc_binary(
         "hasher-config.h",
         "buffer.cpp",
         "buffer.h",
-        "shared_tracker.h",
     ],
 
     deps = [
