@@ -34,3 +34,9 @@ bazel-bin/
 bazel-testlogs/
 bazel-hasher-server/
 .bazelversion
+
+# Python stuff
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
