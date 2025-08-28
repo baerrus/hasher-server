@@ -1,22 +1,20 @@
 # hasher-server
 
-### A highly scalable MD5 hash caclulating server in C++. Demonstates a vertically scalable network server design.  Accepts line delimited string inputs and returns hex-encoded MD5 hash of each string.
+### A highly scalable hash computing server in C++. Demonstates a vertically scalable network server design.  Accepts newline delimited stream of strings and returns hex-encoded MD5 hash of each string.
 
 # The Architecture
 
 The architecture is built around three elements: main thread that listens and accepts new client connections. 
-Handling client connections is farmed out to thread pool #1. So it can service up to N connections simultaneously.
-Executing hash computations is performed on a another thread pool (pool #2). All clients collectively send their 
-computational load to pool #2. Note that each client's computations are executed on different threads but 
-sequientially to preserve correctness and order of the result stream. Both capacity pools are configurable
- via environment variables.
+Handling client connections is farmed out to thread pool #1. So it can service up to N connections simultaneously (configurable).
+Executing hash computations is performed on a another thread. The 'compute' thread is allocated per connection. This choice is preferred due to natural, sequential order in input data. A drawback of this 
+ approach is that dormant clients (clients sending little to no data) would allocate as much valuable server resource as clients that send a lot of data. If the data had no order we could use the alternative described below (with expected higher performance). 
+
+The server listening interface and port as well as capacity of both pools are configurable via environment variables.
+
+Also added a basic, single thread python implementation to compare performance.
 
  ## Alternative Design
-
- A solid alternative would be to use a dedicated compute thread per each client connection. A drawback of this 
- approach is that dormant clients (clients sending little to no data) would consume as much valuable server resource
- as clients that send a lot of data. An advantage is maintaining a stable sequential order of inputs vs output. The
- drawbacks vs advantages of the main approach that was implemented are the exact reverse.
+ All clients collectively send their computational load to pool #2. Note that each client's computations are executed on different spreading the load in th emost efficient way. The pre-requisit is, of course, that the input data has no order to it.
 
 # Dependencies
 
@@ -25,6 +23,11 @@ sequientially to preserve correctness and order of the result stream. Both capac
 
 # Build / Run
 
+## Bazel
+
+`>bazel build haser_server`
+
+## Legacy make
 Run once to prepare dependencies
 
 `> make deps`
@@ -57,6 +60,12 @@ Stop netcat and verify the number of lines in result file is the same as in big.
 128457 test/big.txt
 `> wc -l test/result`
 128457 test/result`
+
+# Performance
+
+I tested two load scenarios. First, client connections come sequencially. This is a rather impractical use case. However, it is useful as a baseline to compare python vs C++ implementations. In this scenario python and C++ implementations show the same performance. Note that C++ code must be compiled with full optimization.
+
+The second scenario is a swarm of client connections hitting the server simultaneously. In that use case the C++ implementation shows ~ 100% better performance that sequencial processing in python.
 
 # TODO
 1. Handle any streamable hash function supported by openssl, not just MD5
