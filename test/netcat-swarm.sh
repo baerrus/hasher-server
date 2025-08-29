@@ -9,10 +9,11 @@ else
     exit 1
 fi
 
-ADDRESS="localhost"
-PORT=8001
-for i in {1..50}; do
-    $NETCAT -w 1 $ADDRESS $PORT < big.txt > "result${i}" &
+ADDRESS=${ADDRESS:-localhost}
+PORT=${PORT:-8000}  # Use PORT from environment or default to 8000
+
+for i in {1..100}; do
+    $NETCAT $ADDRESS $PORT < big.txt > "result${i}" &
 done
 # Wait for all background processes to finish
 wait

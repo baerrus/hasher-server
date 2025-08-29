@@ -9,6 +9,9 @@ else
     exit 1
 fi
 
-for i in {1..50}; do
-    $NETCAT -w 1 localhost 8000 < big.txt > "result${i}"
+ADDRESS=${ADDRESS:-localhost}
+PORT=${PORT:-8000}  # Use PORT from environment or default to 8000
+
+for i in {1..100}; do
+    $NETCAT $ADDRESS $PORT < big.txt > "result${i}"
 done
