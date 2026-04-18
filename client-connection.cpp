@@ -83,17 +83,17 @@ void ClientConnection::do_write(Buffer buffer)
     if (socket_.is_open())
     {
         auto self(shared_from_this());
+        pending_write_ops_++;
         asio::async_write(socket_, asio::buffer(buffer->data(), buffer->size()),
                           [self, buffer](std::error_code ec, std::size_t /*length*/)
                           {
-                            self->pending_write_ops_--;
+                              self->pending_write_ops_--;
                               if (ec)
                               {
                                   std::cerr << "write error: " << ec << std::endl;
                                   self->do_close();
                               }
                           });
-        pending_write_ops_++;
     }
     else
     {
@@ -103,7 +103,12 @@ void ClientConnection::do_write(Buffer buffer)
 
 void ClientConnection::do_close()
 {
-    socket_.close();
+    try {
+        socket_.close();
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error closing socket: " << e.what() << std::endl;
+    }
 }
 /*
 * When client closes the connection there may be some data still being processed.

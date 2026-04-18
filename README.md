@@ -1,6 +1,6 @@
 # hasher-server
 
-### A highly scalable hash computing server in C++. Demonstates a vertically scalable network server design.  Accepts newline delimited stream of strings and returns hex-encoded MD5 hash of each string.
+### This example server in C++ demonstates a vertically scalable network server design. Accepts newline delimited stream of strings and returns hex-encoded MD5 hash of each string. While computing hash is hardly ever useful by itself, the point is demonstrating a server that performs units of work in highly scalable manner. Hashing can be replaced with anything else.
 
 # The Architecture
 
@@ -14,7 +14,7 @@ The server listening interface and port as well as capacity of both pools are co
 Also added a basic, single thread python implementation to compare performance.
 
  ## Alternative Design
- All clients collectively send their computational load to pool #2. Note that each client's computations are executed on different spreading the load in th emost efficient way. The pre-requisit is, of course, that the input data has no order to it.
+ All clients collectively send their computational load to pool #2. Note that each client's computations are executed on different thread thus spreading the load in the most efficient way. The pre-requisite to such approach is, of course, that the input data has no order to it.
 
 # Dependencies
 

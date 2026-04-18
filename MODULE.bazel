@@ -2,7 +2,7 @@
 
 module(
     name = "hasher_server",
-    version = "0.2.0",
+    version = "0.2.1",
 )
 
 bazel_dep(name = "platforms", version = "0.0.8")
